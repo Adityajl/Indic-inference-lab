@@ -104,7 +104,7 @@ def summarize(latencies, tokens_generated):
 
 def run():
     import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM
+    from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 
     if not torch.cuda.is_available():
         print("WARNING: no CUDA GPU detected. INT8 quantization via bitsandbytes "
@@ -148,8 +148,13 @@ def run():
     # ---- INT8 quantized ----
     print(f"\nLoading {config.MODEL_NAME} in INT8 (bitsandbytes)...")
     if device == "cuda":
+        # Newer `transformers` versions removed the `load_in_8bit=True` shorthand
+        # shim on from_pretrained() -- it now has to be passed as an explicit
+        # BitsAndBytesConfig, or it gets forwarded as a raw kwarg into the model
+        # constructor and crashes with a TypeError.
+        quant_config = BitsAndBytesConfig(load_in_8bit=True)
         model_int8 = AutoModelForCausalLM.from_pretrained(
-            config.MODEL_NAME, load_in_8bit=True, device_map="auto",
+            config.MODEL_NAME, quantization_config=quant_config, device_map="auto",
         )
     else:
         print("Skipping INT8 stage — bitsandbytes 8-bit inference requires CUDA.")
