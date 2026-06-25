@@ -1,0 +1,12 @@
+# Indic Inference Lab — benchmark dependencies
+# Tested against a Colab T4 GPU runtime.
+
+torch>=2.1.0
+transformers>=4.40.0
+accelerate>=0.30.0
+bitsandbytes>=0.43.0      # INT8 quantization via load_in_8bit
+datasets>=2.19.0          # pulls FLORES-200 from the Hub
+sentencepiece>=0.2.0      # required by most multilingual tokenizers
+pandas>=2.0.0
+numpy>=1.24.0
+tqdm>=4.66.0

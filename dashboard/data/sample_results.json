@@ -1,0 +1,45 @@
+{
+  "generated_at_utc": "SAMPLE — not a real run",
+  "sample_data": true,
+  "fallback_corpus": false,
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "languages": ["English", "Hindi", "Tamil", "Bengali", "Marathi"],
+  "baseline_language": "English",
+  "hardware": {
+    "gpu_name": "SAMPLE DATA — run benchmark/run_all.py for a real GPU benchmark",
+    "cuda_available": true
+  },
+  "methodology": {
+    "corpus": "facebook/flores (all config, devtest split)",
+    "num_sentences_for_tokenizer_analysis": 200,
+    "num_prompts_for_latency_benchmark": 30,
+    "max_new_tokens_per_request": 64,
+    "batch_size": 1,
+    "quantization_method": "bitsandbytes load_in_8bit"
+  },
+  "tokenizer_efficiency": {
+    "English": { "mean_tokens_per_word": 1.31, "ratio_vs_baseline": 1.0, "sample_sentence": "She walked to the market to buy fresh vegetables.", "sample_token_breakdown": ["She", " walked", " to", " the", " market", " to", " buy", " fresh", " vegetables", "."] },
+    "Hindi": { "mean_tokens_per_word": 2.42, "ratio_vs_baseline": 1.85, "sample_sentence": "वह ताज़ी सब्जियाँ खरीदने के लिए बाज़ार गई।", "sample_token_breakdown": ["व", "ह", " ता", "ज़", "ी", " स", "ब्", "ज़ि", "याँ", " ख़री", "द", "ने"] },
+    "Tamil": { "mean_tokens_per_word": 3.05, "ratio_vs_baseline": 2.33, "sample_sentence": "அவள் புதிய காய்கறிகள் வாங்க சந்தைக்குச் சென்றாள்.", "sample_token_breakdown": ["அ", "வ", "ள்", " பு", "தி", "ய", " கா", "ய்", "க", "றி", "க", "ள்"] },
+    "Bengali": { "mean_tokens_per_word": 2.61, "ratio_vs_baseline": 1.99, "sample_sentence": "সে বাজারে গিয়েছিল তাজা সবজি কিনতে।", "sample_token_breakdown": ["স", "ে", " বা", "জা", "র", "ে", " গি", "য়ে", "ছি", "ল"] },
+    "Marathi": { "mean_tokens_per_word": 2.28, "ratio_vs_baseline": 1.74, "sample_sentence": "ती ताज्या भाज्या विकत घेण्यासाठी बाजारात गेली.", "sample_token_breakdown": ["त", "ी", " ता", "ज्", "य", "ा", " भा", "ज्", "य", "ा"] }
+  },
+  "quantization_benchmark": {
+    "English":  { "fp16": { "mean_latency_s": 1.42, "p50_latency_s": 1.40, "p95_latency_s": 1.58, "tokens_per_second": 45.1 }, "int8": { "mean_latency_s": 0.98, "p50_latency_s": 0.96, "p95_latency_s": 1.10, "tokens_per_second": 65.3 }, "latency_speedup": 1.45, "throughput_speedup": 1.45 },
+    "Hindi":    { "fp16": { "mean_latency_s": 2.61, "p50_latency_s": 2.58, "p95_latency_s": 2.84, "tokens_per_second": 24.5 }, "int8": { "mean_latency_s": 1.79, "p50_latency_s": 1.76, "p95_latency_s": 1.95, "tokens_per_second": 35.8 }, "latency_speedup": 1.46, "throughput_speedup": 1.46 },
+    "Tamil":    { "fp16": { "mean_latency_s": 3.30, "p50_latency_s": 3.27, "p95_latency_s": 3.55, "tokens_per_second": 19.4 }, "int8": { "mean_latency_s": 2.24, "p50_latency_s": 2.21, "p95_latency_s": 2.41, "tokens_per_second": 28.6 }, "latency_speedup": 1.47, "throughput_speedup": 1.47 },
+    "Bengali":  { "fp16": { "mean_latency_s": 2.82, "p50_latency_s": 2.79, "p95_latency_s": 3.02, "tokens_per_second": 22.7 }, "int8": { "mean_latency_s": 1.92, "p50_latency_s": 1.89, "p95_latency_s": 2.08, "tokens_per_second": 33.3 }, "latency_speedup": 1.47, "throughput_speedup": 1.47 },
+    "Marathi":  { "fp16": { "mean_latency_s": 2.46, "p50_latency_s": 2.43, "p95_latency_s": 2.66, "tokens_per_second": 26.0 }, "int8": { "mean_latency_s": 1.68, "p50_latency_s": 1.65, "p95_latency_s": 1.83, "tokens_per_second": 38.1 }, "latency_speedup": 1.46, "throughput_speedup": 1.46 }
+  },
+  "cost_projection": {
+    "pricing_configured": false,
+    "note": "SAMPLE DATA. No price configured — showing relative token cost only.",
+    "per_language": {
+      "English": { "words_in_request": 50, "estimated_tokens": 65.5, "ratio_vs_baseline": 1.0 },
+      "Hindi": { "words_in_request": 50, "estimated_tokens": 121.0, "ratio_vs_baseline": 1.85 },
+      "Tamil": { "words_in_request": 50, "estimated_tokens": 152.5, "ratio_vs_baseline": 2.33 },
+      "Bengali": { "words_in_request": 50, "estimated_tokens": 130.5, "ratio_vs_baseline": 1.99 },
+      "Marathi": { "words_in_request": 50, "estimated_tokens": 114.0, "ratio_vs_baseline": 1.74 }
+    }
+  }
+}

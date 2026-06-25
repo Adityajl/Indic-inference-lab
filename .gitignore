@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+benchmark/data/parallel_corpus.json
+benchmark/results/*.json
+!benchmark/results/.gitkeep
+
+# Node / Next.js
+dashboard/node_modules/
+dashboard/.next/
+dashboard/out/
+
+# OS
+.DS_Store
