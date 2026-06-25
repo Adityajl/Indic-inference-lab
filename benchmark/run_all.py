@@ -1,19 +1,3 @@
-"""
-Runs the full Indic Inference Lab pipeline end to end:
-  1. Download/align the FLORES-200 parallel corpus
-  2. Tokenizer efficiency analysis (tokens/word per language)
-  3. FP16 vs INT8 quantized latency/throughput benchmark per language
-  4. Cost projection (tokens/word ratio -> estimated relative cost per request)
-  5. Combine everything into one results JSON for the dashboard
-
-    python run_all.py
-
-Takes ~15-30 minutes on a free Colab T4 GPU, mostly model download + the
-benchmark loop. After it finishes, copy the output into the dashboard:
-
-    cp results/benchmark_results.json ../dashboard/data/benchmark_results.json
-"""
-
 import json
 import os
 import platform
@@ -35,58 +19,35 @@ def get_hardware_info():
         info["cuda_available"] = torch.cuda.is_available()
         if torch.cuda.is_available():
             info["gpu_name"] = torch.cuda.get_device_name(0)
-            info["gpu_total_memory_gb"] = round(
-                torch.cuda.get_device_properties(0).total_memory / (1024 ** 3), 1
-            )
+            info["gpu_total_memory_gb"] = round(torch.cuda.get_device_properties(0).total_memory / (1024 ** 3), 1)
     except ImportError:
         pass
     return info
 
 
 def compute_cost_projection(tokenizer_results, words_per_request=50):
-    """
-    Translates the tokens-per-word ratio into a concrete, relatable number:
-    "for a typical N-word request, language X needs Y more tokens than English."
-
-    If config.ASSUMED_USD_PER_1K_OUTPUT_TOKENS is left at 0 (the default),
-    this reports relative token cost only — it will NOT fabricate a dollar
-    figure from a price that was never actually configured.
-    """
     per_language = tokenizer_results["per_language"]
     price_per_token = config.ASSUMED_USD_PER_1K_OUTPUT_TOKENS / 1000.0
     projection = {}
-
     for label, stats in per_language.items():
         est_tokens = round(stats["mean_tokens_per_word"] * words_per_request, 1)
-        entry = {
-            "words_in_request": words_per_request,
-            "estimated_tokens": est_tokens,
-            "ratio_vs_baseline": stats.get("ratio_vs_baseline", 1.0),
-        }
+        entry = {"words_in_request": words_per_request, "estimated_tokens": est_tokens, "ratio_vs_baseline": stats.get("ratio_vs_baseline", 1.0)}
         if price_per_token > 0:
             entry["estimated_usd_cost"] = round(est_tokens * price_per_token, 5)
         projection[label] = entry
-
     return {
         "pricing_configured": price_per_token > 0,
-        "note": (
-            "Dollar costs shown." if price_per_token > 0 else
-            "No price configured in config.ASSUMED_USD_PER_1K_OUTPUT_TOKENS — "
-            "showing relative token cost only. Set a real published rate before "
-            "quoting a dollar figure anywhere."
-        ),
+        "note": "Dollar costs shown." if price_per_token > 0 else "No price configured — showing relative token cost only.",
         "per_language": projection,
     }
 
 
 def run_all():
     print("=" * 70)
-    print("INDIC INFERENCE LAB — full pipeline run")
     print(f"Model: {config.MODEL_NAME}")
-    print(f"Languages: {list(config.LANGUAGES.keys())}")
     print("=" * 70)
 
-    print("\n[1/4] Downloading/aligning FLORES-200 corpus...")
+    print("\n[1/4] Downloading/aligning FLORES+ corpus...")
     corpus_data = download_flores()
 
     print("\n[2/4] Running tokenizer efficiency analysis...")
@@ -107,8 +68,7 @@ def run_all():
         "baseline_language": config.BASELINE_LANGUAGE,
         "hardware": get_hardware_info(),
         "methodology": {
-            "corpus": f"{config.FLORES_DATASET} ({config.FLORES_CONFIG} config, "
-                      f"{config.FLORES_SPLIT} split)",
+            "corpus": f"{config.FLORES_DATASET} ({config.FLORES_SPLIT} split)",
             "num_sentences_for_tokenizer_analysis": config.NUM_SENTENCES,
             "num_prompts_for_latency_benchmark": config.NUM_BENCHMARK_PROMPTS,
             "max_new_tokens_per_request": config.MAX_NEW_TOKENS,
@@ -124,16 +84,8 @@ def run_all():
         json.dump(combined, f, ensure_ascii=False, indent=2)
 
     print(f"\nDone. Combined results written to {config.RESULTS_JSON_PATH}")
-    print("Next step: copy this file into the dashboard, then deploy:")
-    print(f"  cp {config.RESULTS_JSON_PATH} ../dashboard/data/benchmark_results.json")
-
     if combined["fallback_corpus"]:
-        print("\n*** WARNING: fallback_corpus is True. The FLORES download failed "
-              "and this run used the tiny built-in 5-sentence corpus instead. "
-              "These numbers are NOT reliable enough for a resume claim — fix the "
-              "download (see data/download_flores.py) and re-run before using "
-              "any number from this output. ***")
-
+        print("\n*** WARNING: fallback_corpus is True. Don't use these numbers on a resume. ***")
     return combined
 
 
