@@ -12,18 +12,15 @@ import os
 # ---------------------------------------------------------------------------
 # Model under test
 # ---------------------------------------------------------------------------
-# Any causal LM on the Hub works. Pick something that fits a free Colab T4
-# (≤16GB VRAM) in FP16 — a 1-3B parameter model is the sweet spot.
-# Swap this for an Indic-tuned model (e.g. "sarvamai/sarvam-1") to compare
-# a generic tokenizer against one built for these languages.
 MODEL_NAME = "Qwen/Qwen2.5-1.5B-Instruct"
 
 # ---------------------------------------------------------------------------
 # Languages under test
 # ---------------------------------------------------------------------------
 # Keys are human-readable labels used in the dashboard.
-# Values are FLORES-200 language codes (ISO 639-3 + ISO 15924 script code).
-# English is the baseline every other language is compared against.
+# Values double as both FLORES language codes AND the per-language config
+# name on openlanguagedata/flores_plus (they use the same ISO 639-3 + script
+# code convention, e.g. "hin_Deva").
 LANGUAGES = {
     "English":  "eng_Latn",
     "Hindi":    "hin_Deva",
@@ -34,27 +31,26 @@ LANGUAGES = {
 BASELINE_LANGUAGE = "English"
 
 # ---------------------------------------------------------------------------
-# FLORES-200 dataset settings
+# FLORES+ dataset settings
 # ---------------------------------------------------------------------------
-FLORES_DATASET = "facebook/flores"
-FLORES_CONFIG = "all"          # single config containing every language as columns
-FLORES_SPLIT = "devtest"       # 1012 parallel sentences, not used in any model's training
-NUM_SENTENCES = 200             # how many parallel sentences to use (devtest has 1012)
+# facebook/flores is deprecated and no longer loadable on datasets>=4.0
+# (HF dropped support for "loading script" datasets entirely). This is its
+# official, actively-maintained, Parquet-native replacement.
+FLORES_DATASET = "openlanguagedata/flores_plus"
+FLORES_SPLIT = "devtest"        # parallel sentences, not used in any model's training
+NUM_SENTENCES = 200              # how many aligned sentences to use
 
 # ---------------------------------------------------------------------------
 # Benchmark settings
 # ---------------------------------------------------------------------------
-NUM_BENCHMARK_PROMPTS = 30      # prompts per language for the latency/throughput run
-MAX_NEW_TOKENS = 64             # generation length per prompt — keep modest on free GPU
-NUM_WARMUP_RUNS = 3             # untimed runs to let CUDA kernels warm up / JIT settle
-BATCH_SIZE = 1                  # sequential requests — matches a single-user inference scenario
+NUM_BENCHMARK_PROMPTS = 30
+MAX_NEW_TOKENS = 64
+NUM_WARMUP_RUNS = 3
+BATCH_SIZE = 1
 
 # ---------------------------------------------------------------------------
 # Cost projection settings
 # ---------------------------------------------------------------------------
-# Update these if you want the dashboard's cost-per-1000-requests numbers to
-# reflect a specific provider's published pricing. Left here, explicitly, so
-# nobody mistakes this for a measured number — it's pricing data, not a benchmark result.
 ASSUMED_USD_PER_1K_OUTPUT_TOKENS = 0.0  # fill in a real published rate before using this
 
 # ---------------------------------------------------------------------------

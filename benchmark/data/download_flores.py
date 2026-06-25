@@ -1,12 +1,14 @@
 """
-Pulls FLORES-200 (via the `facebook/flores` "all" config, which returns every
-language as parallel columns for the same underlying sentence) and writes out
-a JSON file of aligned sentences for just the languages this project cares about.
+Pulls FLORES+ (via openlanguagedata/flores_plus, the maintained Parquet-native
+successor to facebook/flores) and writes out a JSON file of aligned sentences
+for just the languages this project cares about.
 
-"Aligned" is the whole point: row N in English and row N in Hindi are
-translations of the exact same sentence. That's what makes the tokens-per-word
-comparison downstream a fair one — we're never comparing different content,
-only how differently the same content gets tokenized.
+Each language is loaded as its own per-language config (e.g. "hin_Deva").
+Rows across languages share an `id` field when they're translations of the
+same underlying sentence — so alignment means taking the intersection of ids
+present in every language, then reading off the same ids in the same order
+for each one. That's what makes the tokens-per-word comparison downstream
+fair: every language is describing the exact same content.
 
 Run directly to test in isolation:
     python data/download_flores.py
@@ -20,12 +22,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config
 
 
-# A small, hand-written fallback so the pipeline still runs end-to-end (with
-# an honest, visible warning) if the Hub is unreachable or the dataset's
-# column-naming convention has changed since this script was written.
-# This is NOT a substitute for the real corpus — anything produced from this
-# fallback gets clearly tagged in the results JSON so it can never be mistaken
-# for a real benchmark number.
 FALLBACK_CORPUS = {
     "English": [
         "The central bank raised interest rates again this quarter.",
@@ -65,24 +61,11 @@ FALLBACK_CORPUS = {
 }
 
 
-def _find_column(columns, lang_code):
-    """
-    FLORES's 'all' config names columns like 'sentence_eng_Latn'. Search
-    rather than hard-code the exact prefix, so a minor naming change upstream
-    doesn't silently break this script — it'll raise a clear error instead.
-    """
-    candidates = [c for c in columns if lang_code.lower() in c.lower()]
-    if not candidates:
-        return None
-    # Prefer a column that actually starts with "sentence" if multiple match
-    sentence_cols = [c for c in candidates if "sentence" in c.lower()]
-    return sentence_cols[0] if sentence_cols else candidates[0]
-
-
 def download_flores(num_sentences=None):
     """
-    Returns dict: {language_label: [sentence, sentence, ...]}, aligned by index
-    across all languages. Also writes the result to config.PARALLEL_CORPUS_PATH.
+    Returns dict: {language_label: [sentence, sentence, ...]}, aligned by
+    shared FLORES `id` across all languages. Also writes the result to
+    config.PARALLEL_CORPUS_PATH.
     """
     num_sentences = num_sentences or config.NUM_SENTENCES
     result = {}
@@ -91,30 +74,32 @@ def download_flores(num_sentences=None):
     try:
         from datasets import load_dataset
 
-        print(f"Loading {config.FLORES_DATASET} (config='{config.FLORES_CONFIG}', "
-              f"split='{config.FLORES_SPLIT}') from the Hub...")
-        ds = load_dataset(config.FLORES_DATASET, config.FLORES_CONFIG, split=config.FLORES_SPLIT)
-        columns = ds.column_names
-
+        # Load each language as its own per-language config, then align by id.
+        per_language_by_id = {}
         for label, lang_code in config.LANGUAGES.items():
-            col = _find_column(columns, lang_code)
-            if col is None:
-                raise ValueError(
-                    f"Could not find a column for language code '{lang_code}' "
-                    f"(label '{label}') in FLORES columns: {columns[:20]}..."
-                )
-            sentences = ds[col][:num_sentences]
-            result[label] = [s.strip() for s in sentences if s and s.strip()]
-            print(f"  {label:10s} -> column '{col}', {len(result[label])} sentences")
+            print(f"Loading {config.FLORES_DATASET} config='{lang_code}' "
+                  f"split='{config.FLORES_SPLIT}'...")
+            ds = load_dataset(config.FLORES_DATASET, lang_code, split=config.FLORES_SPLIT)
+            id_to_text = {str(row["id"]): row["text"].strip() for row in ds if row.get("text")}
+            per_language_by_id[label] = id_to_text
+            print(f"  {label:10s} -> {len(id_to_text)} sentences")
 
-        # Sanity check: every language should have the same sentence count
-        # since they're parallel — if not, something upstream is misaligned.
-        lengths = {label: len(sents) for label, sents in result.items()}
-        if len(set(lengths.values())) > 1:
-            print(f"WARNING: language sentence counts are not aligned: {lengths}")
+        # Alignment: only keep ids present in EVERY language, so every row we
+        # use really is a translation of the same sentence in all of them.
+        common_ids = set.intersection(*(set(d.keys()) for d in per_language_by_id.values()))
+        sorted_ids = sorted(common_ids, key=lambda x: int(x))[:num_sentences]
+
+        if not sorted_ids:
+            raise ValueError("No common sentence ids found across all configured languages.")
+
+        for label, id_to_text in per_language_by_id.items():
+            result[label] = [id_to_text[i] for i in sorted_ids if i in id_to_text]
+
+        print(f"Aligned {len(sorted_ids)} common sentences across "
+              f"{len(config.LANGUAGES)} languages.")
 
     except Exception as e:
-        print(f"FLORES download failed ({type(e).__name__}: {e}).")
+        print(f"FLORES+ download failed ({type(e).__name__}: {e}).")
         print("Falling back to the small built-in 5-sentence corpus.")
         print("Results derived from this run will be tagged 'fallback_corpus: true' "
               "in the output JSON — do NOT report these as your real benchmark numbers.")
