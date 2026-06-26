@@ -1,4 +1,3 @@
-%%writefile patch_results.py
 """
 Regenerates ONLY the tokenizer_efficiency section (decode fix + chars_per_word)
 and patches it into an existing benchmark_results.json -- no GPU involved,
