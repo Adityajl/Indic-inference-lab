@@ -69,15 +69,21 @@ export default function LatencyThroughputChart({
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4">
-        {data.map((d) => (
-          <div key={d.language} className="bg-surface border border-rule rounded-lg px-3 py-2.5">
-            <p className="font-mono text-xs text-ink2 uppercase tracking-widest2">{d.language}</p>
-            <p className="font-mono text-lg text-marigold mt-1">
-              {d.speedup ? `${d.speedup.toFixed(2)}×` : "—"}
-            </p>
-            <p className="font-body text-xs text-ink2">faster with INT8</p>
-          </div>
-        ))}
+        {data.map((d) => {
+          const isSlower = d.speedup !== null && d.speedup < 1;
+          const displayValue = d.speedup ? (isSlower ? 1 / d.speedup : d.speedup) : null;
+          return (
+            <div key={d.language} className="bg-surface border border-rule rounded-lg px-3 py-2.5">
+              <p className="font-mono text-xs text-ink2 uppercase tracking-widest2">{d.language}</p>
+              <p className={`font-mono text-lg mt-1 ${isSlower ? "text-ember" : "text-marigold"}`}>
+                {displayValue ? `${displayValue.toFixed(2)}×` : "—"}
+              </p>
+              <p className="font-body text-xs text-ink2">
+                {isSlower ? "slower with INT8" : "faster with INT8"}
+              </p>
+            </div>
+          );
+        })}
       </div>
       <p className="font-body text-sm text-ink2/80 mt-4 max-w-2xl">
         Decode speed above is per-token, so it stays roughly flat across languages — the real
