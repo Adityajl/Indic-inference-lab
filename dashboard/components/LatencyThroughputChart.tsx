@@ -79,6 +79,11 @@ export default function LatencyThroughputChart({
           </div>
         ))}
       </div>
+      <p className="font-body text-sm text-ink2/80 mt-4 max-w-2xl">
+        Decode speed above is per-token, so it stays roughly flat across languages — the real
+        cost difference shows up in how many tokens each language needs for the same content,
+        covered next.
+      </p>
     </section>
   );
 }

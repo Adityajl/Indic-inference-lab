@@ -1,10 +1,11 @@
 export interface TokenizerLanguageStats {
   mean_tokens_per_word: number;
+  mean_tokens_per_char: number;
+  chars_per_word: number;
   ratio_vs_baseline: number;
   sample_sentence: string;
   sample_token_breakdown: string[];
 }
-
 export interface LatencyStats {
   mean_latency_s: number;
   p50_latency_s: number;

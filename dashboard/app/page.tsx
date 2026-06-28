@@ -5,6 +5,7 @@ import TokenEfficiencyChart from "@/components/TokenEfficiencyChart";
 import LatencyThroughputChart from "@/components/LatencyThroughputChart";
 import CostProjectionSection from "@/components/CostProjectionSection";
 import MethodologyFooter from "@/components/MethodologyFooter";
+import WordVsCharComparison from "@/components/WordVsCharComparison";
 
 export default function Home() {
   const results = loadResults();

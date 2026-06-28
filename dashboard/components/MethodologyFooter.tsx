@@ -32,6 +32,11 @@ export default function MethodologyFooter({ results }: { results: BenchmarkResul
         {String(methodology.batch_size === 1 ? "no" : "some")} batching overlap — this matches a
         single-user inference scenario, not a high-throughput batched server.
       </p>
+      <p className="font-body text-xs text-ink2/70 mt-3 max-w-2xl">
+        {model} does not officially list Hindi, Tamil, Bengali, or Marathi among its supported
+        languages — this measures the cost of using a model without official support for these
+        languages, not a categorical claim about all LLMs.
+      </p>
     </footer>
   );
 }
