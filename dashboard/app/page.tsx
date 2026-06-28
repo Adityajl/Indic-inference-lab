@@ -6,12 +6,14 @@ import LatencyThroughputChart from "@/components/LatencyThroughputChart";
 import CostProjectionSection from "@/components/CostProjectionSection";
 import MethodologyFooter from "@/components/MethodologyFooter";
 import WordVsCharComparison from "@/components/WordVsCharComparison";
+import DiagnosticTestChart from "@/components/DiagnosticTestChart";
 
 export default function Home() {
   const results = loadResults();
 
   return (
     <main className="min-h-screen bg-ink">
+      <DiagnosticTestChart />
       <SampleDataBanner visible={results.sample_data} />
 
       <TokenBreakdownHero
