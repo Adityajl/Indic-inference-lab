@@ -29,7 +29,7 @@ export default function TokenEfficiencyChart({
         Measured on {languages.length} languages from the same FLORES-200 parallel sentences —
         every bar represents the same underlying content.
       </p>
-      <div className="bg-surface border border-rule rounded-xl p-4 h-80">
+      <div className="bg-surface border border-rule rounded-xl p-4" style={{ height: 320 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
             <CartesianGrid stroke="#2A2E3A" vertical={false} />
