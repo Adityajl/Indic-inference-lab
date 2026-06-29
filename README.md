@@ -2,7 +2,7 @@
 
 **A model with no official Indic-language support needs up to 7.6× more tokens to say the same sentence in Tamil as in English — and INT8 quantization makes inference ~4.5× *slower*, not faster, at single-request batch size.**
 
-🔗 **Live dashboard:** [indic-inference-lab.vercel.app](#) · 📊 **Benchmark code:** [`/benchmark`](./benchmark) · 🖥️ **Dashboard code:** [`/dashboard`](./dashboard)
+🔗 **Live dashboard:** [https://indic-inference-lab.vercel.app/](#) · 📊 **Benchmark code:** [`/benchmark`](./benchmark) · 🖥️ **Dashboard code:** [`/dashboard`](./dashboard)
 
 ---
 
