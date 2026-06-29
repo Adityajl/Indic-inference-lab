@@ -1,11 +1,10 @@
 import { loadResults } from "@/lib/loadResults";
 import SampleDataBanner from "@/components/SampleDataBanner";
 import TokenBreakdownHero from "@/components/TokenBreakdownHero";
-import TokenEfficiencyChart from "@/components/TokenEfficiencyChartClient";
 import WordVsCharComparison from "@/components/WordVsCharComparison";
-import LatencyThroughputChart from "@/components/LatencyThroughputChartClient";
 import CostProjectionSection from "@/components/CostProjectionSection";
 import MethodologyFooter from "@/components/MethodologyFooter";
+import QuantizationSpeedupCards from "@/components/QuantizationSpeedupCards";
 
 export default function Home() {
   const results = loadResults();
@@ -20,11 +19,6 @@ export default function Home() {
         languages={results.languages}
       />
 
-      <TokenEfficiencyChart
-        tokenizerEfficiency={results.tokenizer_efficiency}
-        baselineLanguage={results.baseline_language}
-        languages={results.languages}
-      />
 
       <WordVsCharComparison
         tokenizerEfficiency={results.tokenizer_efficiency}
@@ -32,7 +26,7 @@ export default function Home() {
         languages={results.languages}
       />
 
-      <LatencyThroughputChart
+      <QuantizationSpeedupCards
         quantizationBenchmark={results.quantization_benchmark}
         languages={results.languages}
       />
